@@ -75,11 +75,64 @@
         </div>
       </div>
     </div>
+
+    <!-- Not affected by the global filters; always lists every restocking order -->
+    <div class="card submitted-card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">{{ t('orders.submitted.title') }} ({{ restockingOrders.length }})</h3>
+          <p class="submitted-description">{{ t('orders.submitted.description') }}</p>
+        </div>
+      </div>
+      <div v-if="restockingError" class="error">{{ restockingError }}</div>
+      <div v-else-if="restockingOrders.length === 0" class="submitted-empty">
+        {{ t('orders.submitted.empty') }}
+      </div>
+      <div v-else class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ t('orders.submitted.orderId') }}</th>
+              <th>{{ t('orders.submitted.submittedDate') }}</th>
+              <th>{{ t('orders.submitted.items') }}</th>
+              <th>{{ t('orders.submitted.totalCost') }}</th>
+              <th>{{ t('orders.submitted.leadTime') }}</th>
+              <th>{{ t('orders.submitted.expectedDelivery') }}</th>
+              <th>{{ t('orders.submitted.status') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="ro in restockingOrders" :key="ro.id">
+              <td><strong>{{ ro.id }}</strong></td>
+              <td>{{ formatDate(ro.submitted_date) }}</td>
+              <td>
+                <details class="items-details">
+                  <summary class="items-summary">
+                    {{ t('orders.submitted.itemsCount', { count: ro.items.length }) }}
+                  </summary>
+                  <div class="items-dropdown">
+                    <div v-for="item in ro.items" :key="item.sku" class="item-entry">
+                      <span class="item-name">{{ translateProductName(item.name) }}</span>
+                      <span class="item-meta">{{ item.sku }} - {{ t('orders.quantity') }}: {{ item.quantity }}</span>
+                    </div>
+                  </div>
+                </details>
+              </td>
+              <td><strong>{{ formatMoney(ro.total_cost) }}</strong></td>
+              <td>{{ t('orders.submitted.days', { count: ro.lead_time_days }) }}</td>
+              <td>{{ formatDate(ro.expected_delivery) }}</td>
+              <td><span class="badge info">{{ ro.status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref, onMounted, watch, computed } from 'vue'
+import { formatCurrencyWithDecimals } from '../utils/currency'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
@@ -95,6 +148,8 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const restockingOrders = ref([])
+    const restockingError = ref(null)
 
     // Use shared filters
     const {
@@ -153,13 +208,33 @@ export default {
       })
     }
 
-    onMounted(loadOrders)
+    // Independent of the global filters. The component is re-mounted when the
+    // user navigates back from Restocking, so onMounted also picks up new orders.
+    const loadRestockingOrders = async () => {
+      try {
+        restockingError.value = null
+        restockingOrders.value = await api.getRestockingOrders()
+      } catch (err) {
+        restockingError.value = 'Failed to load submitted orders: ' + err.message
+      }
+    }
+
+    const formatMoney = (amount) =>
+      formatCurrencyWithDecimals(Number(amount) || 0, currentCurrency.value, 2)
+
+    onMounted(() => {
+      loadOrders()
+      loadRestockingOrders()
+    })
 
     return {
       t,
       loading,
       error,
       orders,
+      restockingOrders,
+      restockingError,
+      formatMoney,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
@@ -201,6 +276,25 @@ export default {
 
 .col-value {
   width: 120px;
+}
+
+/* Submitted orders section: slate accent to set it apart from customer orders */
+.submitted-card {
+  border-left: 4px solid #0f172a;
+  margin-top: 1.5rem;
+}
+
+.submitted-description {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.submitted-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 0.938rem;
 }
 
 /* Items details styling */
