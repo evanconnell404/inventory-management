@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -103,6 +104,20 @@ export default {
 
   // Orders
   orders: {
+    submitted: {
+      title: 'Submitted Orders',
+      description: 'Restocking orders placed with suppliers',
+      empty: 'No restocking orders have been submitted yet.',
+      orderId: 'Order ID',
+      submittedDate: 'Submitted',
+      items: 'Items',
+      totalCost: 'Total Cost',
+      leadTime: 'Lead Time',
+      expectedDelivery: 'Expected Delivery',
+      status: 'Status',
+      days: '{count} days',
+      itemsCount: '{count} items'
+    },
     title: 'Orders',
     description: 'View and manage customer orders',
     allOrders: 'All Orders',
@@ -309,6 +324,40 @@ export default {
     english: 'English',
     japanese: 'Japanese',
     selectLanguage: 'Select Language'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Choose a budget to see which items to restock first',
+    budget: 'Budget',
+    budgetSlider: 'Restocking budget',
+    plannedSpend: 'Planned Spend',
+    remaining: 'Remaining Budget',
+    leadTime: 'Order Lead Time',
+    days: '{count} days',
+    fullRestock: 'Full restock cost: {amount}',
+    recommended: 'Recommended Items',
+    empty: 'This budget does not cover any items. Increase the budget to see recommendations.',
+    placeOrder: 'Place Order',
+    submitting: 'Submitting...',
+    orderPlaced: 'Order {id} placed',
+    expectedDelivery: 'Expected delivery: {date}',
+    viewInOrders: 'View in Orders',
+    loadError: 'Failed to load recommendations',
+    submitError: 'Failed to place order',
+    table: {
+      sku: 'SKU',
+      name: 'Name',
+      trend: 'Trend',
+      onHand: 'On Hand',
+      forecast: 'Forecasted Demand',
+      shortfall: 'Shortfall',
+      unitCost: 'Unit Cost',
+      quantity: 'Recommended Qty',
+      lineTotal: 'Line Total',
+      leadTime: 'Lead Time'
+    }
   },
 
   // Common
